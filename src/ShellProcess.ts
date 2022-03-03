@@ -1,5 +1,5 @@
 import EventEmitter from "events";
-import { spawn } from 'child_process'
+import { ChildProcess, spawn } from 'child_process'
 import { OutputLineReader } from "./OutputLineReader";
 import jsyaml from 'js-yaml'
 import { ShellProcessOptions } from "./ShellProcessOptions";
@@ -9,6 +9,7 @@ import { ShellProcessObjectCollector } from "./ShellProcessObjectCollector";
 
 export class ShellProcess {
     private events: EventEmitter;
+    private currentProcess: ChildProcess;
     constructor(public options: ShellProcessOptions) {
         this.events = new EventEmitter();
     }
@@ -90,6 +91,7 @@ export class ShellProcess {
                 env: this.options.env,
                 cwd: this.options.cwd
             });
+            this.currentProcess = process;
 
             process.stdout.on('data', (data) => {
                 this.events.emit('output', data.toString());
@@ -100,7 +102,7 @@ export class ShellProcess {
                 if (stderr) stderr(data.toString());
             });
             process.stdin.on('error', (error) => {
-                if (this.events.eventNames().includes("error"))  this.events.emit('error', error);
+                if (this.events.eventNames().includes("error")) this.events.emit('error', error);
             });
             if (this.options.stdin) {
                 process.stdin.write(this.options.stdin);
@@ -113,6 +115,20 @@ export class ShellProcess {
                     resolve(true);
                 } else {
                     reject(new Error(`Process exited with code ${code}`));
+                }
+            });
+        });
+    }
+    async kill() {
+        return this.currentProcess.kill();
+    }
+    async wait() {
+        return new Promise((resolve, reject) => {
+            this.currentProcess.on('exit', (code, signal) => {
+                if (code === 0) {
+                    resolve(true);
+                } else {
+                    reject(new Error(`Process exited with code ${code}`);
                 }
             });
         });

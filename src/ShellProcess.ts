@@ -128,7 +128,7 @@ export class ShellProcess {
                 if (code === 0) {
                     resolve(true);
                 } else {
-                    reject(new Error(`Process exited with code ${code}`);
+                    reject(new Error(`Process exited with code ${code}`));
                 }
             });
         });

@@ -1,5 +1,6 @@
+import { CommonSpawnOptions } from "child_process";
 
-export interface ShellProcessOptions {
+export interface ShellProcessOptions extends CommonSpawnOptions {
     path: string;
     args?: string[];
     env?: { [key: string]: string; };

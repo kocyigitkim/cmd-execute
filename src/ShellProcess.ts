@@ -88,6 +88,8 @@ export class ShellProcess {
     async run(stdout = null, stderr = null) {
         return new Promise((resolve, reject) => {
             var process = spawn(this.options.path, this.options.args, {
+                ...this.options,
+                shell: true,
                 env: this.options.env,
                 cwd: this.options.cwd
             });
